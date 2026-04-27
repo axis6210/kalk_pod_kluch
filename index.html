@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>КП — Плиточные работы</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+
+:root {
+  --bg:       #f0f2f5;
+  --card:     #ffffff;
+  --border:   #e2e6ed;
+  --border2:  #c8cdd8;
+  --accent:   #1c3f7a;
+  --accent-l: #2456aa;
+  --amber:    #d97706;
+  --amber-l:  #fef3c7;
+  --green:    #166534;
+  --green-bg: #dcfce7;
+  --red:      #dc2626;
+  --red-bg:   #fee2e2;
+  --text:     #111827;
+  --text2:    #6b7280;
+  --text3:    #9ca3af;
+  --shadow:   0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.06);
+  --r:        8px;
+  --r2:       5px;
+}
+
+* { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  min-height: 100vh;
+  padding-bottom: 50px;
+}
+
+/* ══ STICKY TOP ══════════════════════════════════════════════ */
+.top {
+  background: var(--accent);
+  padding: 12px 14px;
+  position: sticky; top: 0; z-index: 200;
+  display: flex; align-items: center; justify-content: space-between;
+  box-shadow: 0 2px 8px rgba(0,0,0,.2);
+}
+.top-title {
+  font-size: 12px; font-weight: 600; letter-spacing: .8px;
+  text-transform: uppercase; color: rgba(255,255,255,.6);
+}
+.top-sum {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 18px; font-weight: 600; color: #fff;
+}
+
+/* ══ META ════════════════════════════════════════════════════ */
+.meta {
+  margin: 10px 10px 0;
+  background: var(--card);
+  border-radius: var(--r);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  border-left: 3px solid var(--amber);
+}
+.meta-row {
+  display: flex; align-items: center;
+  padding: 8px 12px; gap: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.meta-row:last-child { border-bottom: none; }
+.meta-lbl {
+  font-size: 10px; font-weight: 600; color: var(--text3);
+  text-transform: uppercase; letter-spacing: .4px;
+  white-space: nowrap; min-width: 70px;
+}
+.meta-inp {
+  flex: 1; border: none; outline: none;
+  font-family: 'Inter', sans-serif; font-size: 13px; color: var(--text);
+  background: transparent;
+}
+.meta-inp::placeholder { color: var(--text3); }
+
+/* ══ ROOM CARD ═══════════════════════════════════════════════ */
+.room {
+  margin: 10px 10px 0;
+  background: var(--card);
+  border-radius: var(--r);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+/* Room header */
+.room-head {
+  display: flex; align-items: center; gap: 8px;
+  padding: 11px 12px;
+  background: var(--accent);
+  cursor: pointer;
+}
+.room-name-inp {
+  flex: 1; border: none; outline: none;
+  background: transparent;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px; font-weight: 600; color: #fff;
+}
+.room-name-inp::placeholder { color: rgba(255,255,255,.4); }
+.room-head-total {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px; color: rgba(255,255,255,.85);
+  white-space: nowrap;
+}
+.room-del-btn {
+  background: none; border: none; cursor: pointer;
+  color: rgba(255,255,255,.4); font-size: 18px; padding: 0 2px;
+  line-height: 1; transition: color .15s;
+}
+.room-del-btn:hover { color: #fca5a5; }
+.room-chevron {
+  color: rgba(255,255,255,.5); font-size: 11px;
+  transition: transform .2s;
+}
+.room.collapsed .room-chevron { transform: rotate(-90deg); }
+.room.collapsed .room-body { display: none; }
+
+.room-body { border-top: 1px solid var(--border); }
+
+/* ══ SECTION BLOCK ═══════════════════════════════════════════ */
+.sec-block {
+  border-bottom: 1px solid var(--border);
+}
+.sec-block:last-child { border-bottom: none; }
+
+.sec-toggle-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 12px; cursor: pointer; user-select: none;
+}
+.sec-icon { font-size: 16px; }
+.sec-label {
+  flex: 1; font-size: 12px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .5px; color: var(--text2);
+}
+.sec-badge {
+  font-size: 11px; color: var(--text3); font-family: 'JetBrains Mono', monospace;
+}
+
+/* Toggle switch */
+.sw {
+  position: relative; width: 34px; height: 20px; flex-shrink: 0;
+}
+.sw input { opacity: 0; width: 0; height: 0; }
+.sw-track {
+  position: absolute; inset: 0;
+  background: var(--border2); border-radius: 10px;
+  transition: background .2s; cursor: pointer;
+}
+.sw input:checked + .sw-track { background: var(--accent-l); }
+.sw-track::after {
+  content: '';
+  position: absolute; left: 2px; top: 2px;
+  width: 16px; height: 16px;
+  background: #fff; border-radius: 50%;
+  transition: transform .2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,.2);
+}
+.sw input:checked + .sw-track::after { transform: translateX(14px); }
+
+.sec-content {
+  padding: 0 12px 12px;
+  display: none;
+}
+.sec-content.open { display: block; }
+
+/* ══ FLOOR SECTION ═══════════════════════════════════════════ */
+.surface-card {
+  background: #f8f9fb;
+  border: 1px solid var(--border);
+  border-radius: var(--r2);
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+.surface-card.wall-card { border-left: 3px solid var(--accent-l); }
+.surface-card.floor-card { border-left: 3px solid var(--amber); }
+.surface-card.trim-card { border-left: 3px solid #7c3aed; }
+
+.surface-row {
+  display: flex; align-items: center; gap: 6px;
+  padding: 7px 10px;
+  border-bottom: 1px solid var(--border);
+}
+.surface-row:last-child { border-bottom: none; }
+
+.s-lbl {
+  font-size: 10px; font-weight: 600; color: var(--text3);
+  text-transform: uppercase; letter-spacing: .3px;
+  white-space: nowrap; min-width: 40px;
+}
+.s-inp {
+  flex: 1; border: none; outline: none;
+  font-family: 'Inter', sans-serif; font-size: 13px; color: var(--text);
+  background: transparent;
+}
+.s-inp::placeholder { color: var(--text3); }
+
+.s-num {
+  border: none; outline: none;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px; color: var(--text);
+  background: transparent;
+  width: 60px; text-align: right;
+}
+.s-unit {
+  font-size: 11px; color: var(--text2); white-space: nowrap;
+}
+.s-price-inp {
+  border: none; outline: none;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; color: var(--accent);
+  background: transparent;
+  width: 58px; text-align: right;
+}
+
+/* Wall card header with delete */
+.surface-head {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 10px;
+  background: rgba(36,86,170,.06);
+  border-bottom: 1px solid var(--border);
+}
+.surface-head-lbl {
+  flex: 1; font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .5px; color: var(--accent-l);
+}
+.surf-del {
+  background: none; border: none; cursor: pointer;
+  color: var(--text3); font-size: 15px; line-height: 1; padding: 0;
+}
+.surf-del:hover { color: var(--red); }
+
+.add-surf-btn {
+  display: flex; align-items: center; gap: 6px;
+  background: none; border: 1.5px dashed var(--border2);
+  border-radius: var(--r2); color: var(--text3);
+  font-family: 'Inter', sans-serif; font-size: 12px;
+  padding: 8px 12px; cursor: pointer; width: 100%;
+  transition: all .2s;
+}
+.add-surf-btn:hover { border-color: var(--accent-l); color: var(--accent-l); }
+
+/* ══ EXTRAS ══════════════════════════════════════════════════ */
+.extra-row {
+  display: grid; grid-template-columns: auto 1fr auto auto auto;
+  align-items: center; gap: 6px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--border);
+}
+.extra-row:last-child { border-bottom: none; }
+.extra-name { font-size: 12px; color: var(--text); }
+.extra-qty {
+  border: none; outline: none;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px; color: var(--text);
+  background: transparent; text-align: right;
+  width: 56px;
+}
+.extra-unit { font-size: 11px; color: var(--text2); white-space: nowrap; }
+.extra-price {
+  border: none; outline: none;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; color: var(--accent);
+  background: transparent; text-align: right;
+  width: 54px;
+}
+
+/* ══ POSITIONS TABLE ══════════════════════════════════════════ */
+.pos-section {
+  background: #f0f4fa;
+  border-top: 2px solid var(--border);
+}
+.pos-section-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.pos-section-lbl {
+  font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .5px; color: var(--text2);
+}
+.pos-section-total {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px; font-weight: 600; color: var(--accent);
+}
+
+.pos-table { width: 100%; }
+.pos-row {
+  display: grid;
+  grid-template-columns: 20px 1fr 58px 28px 60px 72px;
+  gap: 2px; align-items: center;
+  padding: 5px 10px;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+}
+.pos-row:last-child { border-bottom: none; }
+.pos-row:nth-child(odd) { background: rgba(255,255,255,.6); }
+.pos-n { color: var(--text3); font-size: 11px; text-align: center; }
+.pos-name { color: var(--text); line-height: 1.3; font-size: 11px; }
+.pos-qty {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; text-align: right; color: var(--text);
+}
+.pos-unit { font-size: 10px; color: var(--text2); }
+.pos-price {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: var(--text2); text-align: right;
+}
+.pos-sum {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; font-weight: 600; color: var(--accent); text-align: right;
+}
+
+/* ══ ADD ROOM ════════════════════════════════════════════════ */
+.add-room {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  margin: 10px;
+  background: var(--card); border: 1.5px dashed var(--border2);
+  border-radius: var(--r); color: var(--text2);
+  font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500;
+  padding: 13px; cursor: pointer; width: calc(100% - 20px);
+  box-shadow: var(--shadow);
+  transition: all .2s;
+}
+.add-room:hover { border-color: var(--accent-l); color: var(--accent); }
+
+/* ══ FOOTER ══════════════════════════════════════════════════ */
+.footer {
+  margin: 10px;
+  background: var(--card);
+  border-radius: var(--r);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.footer-total-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 14px;
+}
+.footer-total-lbl { font-size: 11px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: .4px; }
+.footer-total-amt {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 24px; font-weight: 700; color: var(--accent);
+}
+.footer-hint { padding: 0 14px 10px; font-size: 11px; color: var(--text3); }
+.footer-btns {
+  display: flex; gap: 8px; padding: 10px 14px 14px;
+  border-top: 1px solid var(--border);
+}
+.btn {
+  flex: 1; padding: 11px 8px; border: none; border-radius: var(--r2);
+  font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600;
+  cursor: pointer; transition: all .15s;
+}
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:active { background: #132d5a; }
+.btn-sec { background: var(--bg); color: var(--text2); border: 1px solid var(--border2); }
+
+/* ══ TOAST ═══════════════════════════════════════════════════ */
+.toast {
+  position: fixed; bottom: 20px; left: 50%;
+  transform: translateX(-50%) translateY(60px);
+  background: var(--accent); color: #fff;
+  font-size: 13px; font-weight: 600;
+  padding: 9px 22px; border-radius: 20px; z-index: 999;
+  transition: transform .3s; pointer-events: none;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+/* focus highlight */
+input:focus { background: #fffbeb !important; border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<div class="top">
+  <div class="top-title">КП · Плиточные работы</div>
+  <div class="top-sum" id="topSum">0 ₽</div>
+</div>
+
+<div class="meta">
+  <div class="meta-row">
+    <span class="meta-lbl">Адрес</span>
+    <input class="meta-inp" id="mAddr" placeholder="г. Санкт-Петербург, …"
+      value="г. СПб, пр. Энгельса, д.31, кв. 353">
+  </div>
+  <div class="meta-row">
+    <span class="meta-lbl">Заказчик</span>
+    <input class="meta-inp" id="mClient" placeholder="ФИО / организация">
+  </div>
+  <div class="meta-row">
+    <span class="meta-lbl">Дата</span>
+    <input class="meta-inp" id="mDate" placeholder="дд.мм.гггг">
+  </div>
+</div>
+
+<div id="roomsWrap"></div>
+
+<button class="add-room" onclick="addRoom()">
+  ＋ Добавить помещение
+</button>
+
+<div class="footer">
+  <div class="footer-total-row">
+    <div class="footer-total-lbl">Итого без НДС</div>
+    <div class="footer-total-amt" id="footerAmt">0 ₽</div>
+  </div>
+  <div class="footer-hint">НДС не облагается.</div>
+  <div class="footer-btns">
+    <button class="btn btn-primary" onclick="copyKP()">📋 Скопировать КП</button>
+    <button class="btn btn-sec" onclick="copyTSV()">↓ Excel</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════
+let _uid = 0;
+const uid = () => 'u' + (++_uid);
+
+/* Default prices (per unit) */
+const DEF = {
+  floorLay:  6500,
+  wallLay:   8000,
+  trimLay:   9150,   // ₽/пог.м для откосов
+  cut45:     1200,
+  cutting:   1000,
+  grout:     1300,
+  holes:     1700,
+};
+
+function makeWall(label='') {
+  return { id: uid(), label, area: 0, tile: '', price: DEF.wallLay };
+}
+
+function makeRoom(name='') {
+  return {
+    id: uid(), name, collapsed: false,
+    // ПОЛ
+    floor: { on: true,  area: 0, tile: '', price: DEF.floorLay },
+    // СТЕНЫ — массив поверхностей
+    wallsOn: true,
+    walls: [ makeWall() ],
+    // ОТКОСЫ (пог.м)
+    trims: { on: false, length: 0, tile: '', price: DEF.trimLay },
+    // ДОП РАБОТЫ
+    cut45:   { on: false, length: 0, price: DEF.cut45 },
+    cutting: { on: false, length: 0, price: DEF.cutting },
+    grout:   { on: true,  price: DEF.grout },   // площадь автоматом
+    holes:   { on: false, qty: 0,    price: DEF.holes },
+  };
+}
+
+let rooms = [];
+
+// ═══════════════════════════════════════════════════════════
+//  COMPUTED
+// ═══════════════════════════════════════════════════════════
+function getPositions(room) {
+  const pos = [];
+  // Пол
+  if (room.floor.on && room.floor.area > 0) {
+    const nm = room.floor.tile
+      ? 'Укладка ' + room.floor.tile + ' на пол'
+      : 'Укладка плитки на пол';
+    pos.push({ name: nm, qty: room.floor.area, unit: 'м²', price: room.floor.price });
+  }
+  // Стены — каждая поверхность отдельной строкой
+  if (room.wallsOn) {
+    room.walls.forEach(w => {
+      if (!w.area) return;
+      let nm = w.tile ? 'Укладка ' + w.tile : 'Укладка плитки';
+      nm += w.label ? ' — ' + w.label : ' на стены';
+      pos.push({ name: nm, qty: w.area, unit: 'м²', price: w.price });
+    });
+  }
+  // Откосы
+  if (room.trims.on && room.trims.length > 0) {
+    const nm = room.trims.tile
+      ? 'Откосы дверные (' + room.trims.tile + ')'
+      : 'Откосы дверные';
+    pos.push({ name: nm, qty: room.trims.length, unit: 'пог.м', price: room.trims.price });
+  }
+  // Рез 45°
+  if (room.cut45.on && room.cut45.length > 0) {
+    pos.push({ name: 'Рез 45°', qty: room.cut45.length, unit: 'м', price: room.cut45.price });
+  }
+  // Резка плитки
+  if (room.cutting.on && room.cutting.length > 0) {
+    pos.push({ name: 'Резка плитки', qty: room.cutting.length, unit: 'м', price: room.cutting.price });
+  }
+  // Затирка — авто площадь
+  if (room.grout.on) {
+    let area = 0;
+    if (room.floor.on) area += +room.floor.area;
+    if (room.wallsOn) room.walls.forEach(w => area += +w.area);
+    if (area > 0) {
+      pos.push({ name: 'Затирка плитки', qty: Math.round(area * 100)/100, unit: 'м²', price: room.grout.price });
+    }
+  }
+  // Отверстия
+  if (room.holes.on && room.holes.qty > 0) {
+    pos.push({ name: 'Выпиливание отверстий', qty: room.holes.qty, unit: 'шт', price: room.holes.price });
+  }
+  return pos;
+}
+
+function roomTotal(room) {
+  return getPositions(room).reduce((s, p) => s + p.qty * p.price, 0);
+}
+
+function grandTotal() {
+  return rooms.reduce((s, r) => s + roomTotal(r), 0);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  RENDER
+// ═══════════════════════════════════════════════════════════
+function render() {
+  const wrap = document.getElementById('roomsWrap');
+  wrap.innerHTML = '';
+  rooms.forEach(r => wrap.appendChild(buildRoom(r)));
+  updateTotals();
+}
+
+function updateTotals() {
+  const gt = grandTotal();
+  document.getElementById('topSum').textContent = fmt(gt) + ' ₽';
+  document.getElementById('footerAmt').textContent = fmt(gt) + ' ₽';
+}
+
+function buildRoom(room) {
+  const el = document.createElement('div');
+  el.className = 'room' + (room.collapsed ? ' collapsed' : '');
+  el.id = 'room_' + room.id;
+
+  const total = roomTotal(room);
+  const pos = getPositions(room);
+  const groutArea = (() => {
+    let a = 0;
+    if (room.floor.on) a += +room.floor.area;
+    if (room.wallsOn) room.walls.forEach(w => a += +w.area);
+    return Math.round(a * 100) / 100;
+  })();
+
+  el.innerHTML = `
+  <div class="room-head" onclick="toggleRoom('${room.id}')">
+    <input class="room-name-inp" value="${esc(room.name)}" placeholder="Название помещения…"
+      onclick="event.stopPropagation()"
+      oninput="setRoom('${room.id}','name',this.value)">
+    <span class="room-head-total">${fmt(total)} ₽</span>
+    <button class="room-del-btn" onclick="event.stopPropagation();delRoom('${room.id}')">×</button>
+    <span class="room-chevron">▼</span>
+  </div>
+
+  <div class="room-body">
+
+    <!-- ПОЛ -->
+    <div class="sec-block">
+      <div class="sec-toggle-row" onclick="toggleSec(event,'${room.id}','floor')">
+        <span class="sec-icon">⬜</span>
+        <span class="sec-label">Пол</span>
+        <span class="sec-badge">${room.floor.on && room.floor.area ? room.floor.area + ' м²' : ''}</span>
+        <label class="sw" onclick="event.stopPropagation()">
+          <input type="checkbox" ${room.floor.on?'checked':''}
+            onchange="setFloor('${room.id}','on',this.checked)">
+          <div class="sw-track"></div>
+        </label>
+      </div>
+      <div class="sec-content${room.floor.on?' open':''}">
+        <div class="surface-card floor-card">
+          <div class="surface-row">
+            <span class="s-lbl">Плитка</span>
+            <input class="s-inp" placeholder="формат / марка (напр. 60×120 керамогранит)"
+              value="${esc(room.floor.tile)}"
+              oninput="setFloor('${room.id}','tile',this.value)">
+          </div>
+          <div class="surface-row">
+            <span class="s-lbl">Площадь</span>
+            <input class="s-num" type="number" min="0" step="0.01"
+              value="${room.floor.area || ''}" placeholder="0"
+              oninput="setFloor('${room.id}','area',+this.value)">
+            <span class="s-unit">м²</span>
+            <span class="s-unit" style="padding:0 6px;color:var(--text3)">·</span>
+            <input class="s-price-inp" type="number" min="0" step="100"
+              value="${room.floor.price}"
+              oninput="setFloor('${room.id}','price',+this.value)">
+            <span class="s-unit">₽/м²</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- СТЕНЫ -->
+    <div class="sec-block">
+      <div class="sec-toggle-row" onclick="toggleSec(event,'${room.id}','walls')">
+        <span class="sec-icon">🪟</span>
+        <span class="sec-label">Стены</span>
+        <span class="sec-badge">${room.wallsOn && room.walls.some(w=>w.area)
+          ? room.walls.reduce((s,w)=>s+(+w.area),0).toFixed(2) + ' м²' : ''}</span>
+        <label class="sw" onclick="event.stopPropagation()">
+          <input type="checkbox" ${room.wallsOn?'checked':''}
+            onchange="setRoomProp('${room.id}','wallsOn',this.checked)">
+          <div class="sw-track"></div>
+        </label>
+      </div>
+      <div class="sec-content${room.wallsOn?' open':''}">
+        <div id="walls_${room.id}">
+          ${room.walls.map(w => buildWallCard(room.id, w)).join('')}
+        </div>
+        <button class="add-surf-btn" onclick="addWall('${room.id}')">
+          ＋ добавить поверхность / другой формат
+        </button>
+      </div>
+    </div>
+
+    <!-- ОТКОСЫ -->
+    <div class="sec-block">
+      <div class="sec-toggle-row" onclick="toggleSec(event,'${room.id}','trims')">
+        <span class="sec-icon">🚪</span>
+        <span class="sec-label">Откосы дверные</span>
+        <span class="sec-badge">${room.trims.on && room.trims.length
+          ? room.trims.length + ' пог.м' : ''}</span>
+        <label class="sw" onclick="event.stopPropagation()">
+          <input type="checkbox" ${room.trims.on?'checked':''}
+            onchange="setTrim('${room.id}','on',this.checked)">
+          <div class="sw-track"></div>
+        </label>
+      </div>
+      <div class="sec-content${room.trims.on?' open':''}">
+        <div class="surface-card trim-card">
+          <div class="surface-row">
+            <span class="s-lbl">Плитка</span>
+            <input class="s-inp" placeholder="формат плитки для откосов"
+              value="${esc(room.trims.tile)}"
+              oninput="setTrim('${room.id}','tile',this.value)">
+          </div>
+          <div class="surface-row">
+            <span class="s-lbl">Длина</span>
+            <input class="s-num" type="number" min="0" step="0.1"
+              value="${room.trims.length || ''}" placeholder="0"
+              oninput="setTrim('${room.id}','length',+this.value)">
+            <span class="s-unit">пог.м</span>
+            <span class="s-unit" style="padding:0 6px;color:var(--text3)">·</span>
+            <input class="s-price-inp" type="number" min="0" step="100"
+              value="${room.trims.price}"
+              oninput="setTrim('${room.id}','price',+this.value)">
+            <span class="s-unit">₽/п.м</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ДОП РАБОТЫ -->
+    <div class="sec-block">
+      <div class="sec-toggle-row" style="cursor:default">
+        <span class="sec-icon">⚙️</span>
+        <span class="sec-label">Доп. работы</span>
+      </div>
+      <div class="sec-content open" style="padding-top:0">
+
+        <div class="extra-row">
+          <label class="sw">
+            <input type="checkbox" ${room.cut45.on?'checked':''}
+              onchange="setExtra('${room.id}','cut45','on',this.checked)">
+            <div class="sw-track"></div>
+          </label>
+          <span class="extra-name">Рез 45°</span>
+          <input class="extra-qty" type="number" min="0" step="0.1"
+            value="${room.cut45.length||''}" placeholder="0"
+            oninput="setExtra('${room.id}','cut45','length',+this.value)">
+          <span class="extra-unit">м</span>
+          <input class="extra-price" type="number" min="0" step="100"
+            value="${room.cut45.price}"
+            oninput="setExtra('${room.id}','cut45','price',+this.value)">
+          <span class="extra-unit">₽/м</span>
+        </div>
+
+        <div class="extra-row">
+          <label class="sw">
+            <input type="checkbox" ${room.cutting.on?'checked':''}
+              onchange="setExtra('${room.id}','cutting','on',this.checked)">
+            <div class="sw-track"></div>
+          </label>
+          <span class="extra-name">Резка плитки</span>
+          <input class="extra-qty" type="number" min="0" step="0.1"
+            value="${room.cutting.length||''}" placeholder="0"
+            oninput="setExtra('${room.id}','cutting','length',+this.value)">
+          <span class="extra-unit">м</span>
+          <input class="extra-price" type="number" min="0" step="100"
+            value="${room.cutting.price}"
+            oninput="setExtra('${room.id}','cutting','price',+this.value)">
+          <span class="extra-unit">₽/м</span>
+        </div>
+
+        <div class="extra-row">
+          <label class="sw">
+            <input type="checkbox" ${room.grout.on?'checked':''}
+              onchange="setExtra('${room.id}','grout','on',this.checked)">
+            <div class="sw-track"></div>
+          </label>
+          <span class="extra-name">Затирка</span>
+          <span class="extra-qty" style="color:var(--text3);font-family:'JetBrains Mono',monospace;font-size:12px;text-align:right">авто<br>${groutArea}</span>
+          <span class="extra-unit">м²</span>
+          <input class="extra-price" type="number" min="0" step="100"
+            value="${room.grout.price}"
+            oninput="setExtra('${room.id}','grout','price',+this.value)">
+          <span class="extra-unit">₽/м²</span>
+        </div>
+
+        <div class="extra-row">
+          <label class="sw">
+            <input type="checkbox" ${room.holes.on?'checked':''}
+              onchange="setExtra('${room.id}','holes','on',this.checked)">
+            <div class="sw-track"></div>
+          </label>
+          <span class="extra-name">Отверстия</span>
+          <input class="extra-qty" type="number" min="0" step="1"
+            value="${room.holes.qty||''}" placeholder="0"
+            oninput="setExtra('${room.id}','holes','qty',+this.value)">
+          <span class="extra-unit">шт</span>
+          <input class="extra-price" type="number" min="0" step="100"
+            value="${room.holes.price}"
+            oninput="setExtra('${room.id}','holes','price',+this.value)">
+          <span class="extra-unit">₽/шт</span>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ПОЗИЦИИ КП -->
+    ${pos.length ? `
+    <div class="pos-section">
+      <div class="pos-section-head">
+        <span class="pos-section-lbl">Позиции КП</span>
+        <span class="pos-section-total">${fmt(total)} ₽</span>
+      </div>
+      <div class="pos-table">
+        ${pos.map((p, i) => `
+        <div class="pos-row">
+          <span class="pos-n">${i+1}</span>
+          <span class="pos-name">${esc(p.name)}</span>
+          <span class="pos-qty">${fmtQ(p.qty)}</span>
+          <span class="pos-unit">${p.unit}</span>
+          <span class="pos-price">${fmt(p.price)}</span>
+          <span class="pos-sum">${fmt(p.qty*p.price)}</span>
+        </div>`).join('')}
+      </div>
+    </div>` : ''}
+
+  </div>`;
+  return el;
+}
+
+function buildWallCard(roomId, w) {
+  return `
+  <div class="surface-card wall-card" id="wcard_${w.id}">
+    <div class="surface-head">
+      <span class="surface-head-lbl">Поверхность / зона</span>
+      <button class="surf-del" onclick="delWall('${roomId}','${w.id}')">×</button>
+    </div>
+    <div class="surface-row">
+      <span class="s-lbl">Назв.</span>
+      <input class="s-inp" placeholder="напр. основная стена / фартук / декор"
+        value="${esc(w.label)}"
+        oninput="setWall('${roomId}','${w.id}','label',this.value)">
+    </div>
+    <div class="surface-row">
+      <span class="s-lbl">Плитка</span>
+      <input class="s-inp" placeholder="60×120 керамогранит / декор / …"
+        value="${esc(w.tile)}"
+        oninput="setWall('${roomId}','${w.id}','tile',this.value)">
+    </div>
+    <div class="surface-row">
+      <span class="s-lbl">Площадь</span>
+      <input class="s-num" type="number" min="0" step="0.01"
+        value="${w.area||''}" placeholder="0"
+        oninput="setWall('${roomId}','${w.id}','area',+this.value)">
+      <span class="s-unit">м²</span>
+      <span class="s-unit" style="padding:0 6px;color:var(--text3)">·</span>
+      <input class="s-price-inp" type="number" min="0" step="100"
+        value="${w.price}"
+        oninput="setWall('${roomId}','${w.id}','price',+this.value)">
+      <span class="s-unit">₽/м²</span>
+    </div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  ACTIONS
+// ═══════════════════════════════════════════════════════════
+function addRoom() {
+  const r = makeRoom();
+  rooms.push(r);
+  render();
+  // Focus name input
+  setTimeout(() => {
+    const el = document.querySelector('#room_'+r.id+' .room-name-inp');
+    if (el) el.focus();
+  }, 60);
+}
+
+function delRoom(id) {
+  rooms = rooms.filter(r => r.id !== id);
+  render();
+}
+
+function toggleRoom(id) {
+  const r = rooms.find(r => r.id === id);
+  r.collapsed = !r.collapsed;
+  const el = document.getElementById('room_'+id);
+  if (el) el.classList.toggle('collapsed', r.collapsed);
+  el.querySelector('.room-chevron').style.transform = r.collapsed ? 'rotate(-90deg)' : '';
+}
+
+function toggleSec(event, roomId, sec) {
+  // Don't toggle if clicking the switch
+  if (event.target.closest('.sw')) return;
+  const r = rooms.find(r => r.id === roomId);
+  if (sec === 'floor') { r.floor.on = !r.floor.on; setFloor(roomId,'on',r.floor.on); return; }
+  if (sec === 'walls') { r.wallsOn = !r.wallsOn; setRoomProp(roomId,'wallsOn',r.wallsOn); return; }
+  if (sec === 'trims') { r.trims.on = !r.trims.on; setTrim(roomId,'on',r.trims.on); return; }
+}
+
+function setRoom(id, field, val) {
+  rooms.find(r=>r.id===id)[field] = val;
+  updateTotals();
+}
+
+function setRoomProp(id, field, val) {
+  rooms.find(r=>r.id===id)[field] = val;
+  rerenderRoom(id);
+}
+
+function setFloor(id, field, val) {
+  rooms.find(r=>r.id===id).floor[field] = val;
+  rerenderRoom(id);
+}
+
+function setTrim(id, field, val) {
+  rooms.find(r=>r.id===id).trims[field] = val;
+  rerenderRoom(id);
+}
+
+function setWall(roomId, wallId, field, val) {
+  const room = rooms.find(r=>r.id===roomId);
+  const w = room.walls.find(w=>w.id===wallId);
+  w[field] = val;
+  rerenderRoom(roomId);
+}
+
+function addWall(roomId) {
+  rooms.find(r=>r.id===roomId).walls.push(makeWall());
+  rerenderRoom(roomId);
+}
+
+function delWall(roomId, wallId) {
+  const room = rooms.find(r=>r.id===roomId);
+  if (room.walls.length === 1) { room.walls[0] = makeWall(); }
+  else room.walls = room.walls.filter(w=>w.id!==wallId);
+  rerenderRoom(roomId);
+}
+
+function setExtra(roomId, key, field, val) {
+  rooms.find(r=>r.id===roomId)[key][field] = val;
+  rerenderRoom(roomId);
+}
+
+function rerenderRoom(id) {
+  const room = rooms.find(r=>r.id===id);
+  const old = document.getElementById('room_'+id);
+  if (!old) return;
+  const newEl = buildRoom(room);
+  old.replaceWith(newEl);
+  updateTotals();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  EXPORT
+// ═══════════════════════════════════════════════════════════
+function copyKP() {
+  const addr = document.getElementById('mAddr').value.trim();
+  const cli  = document.getElementById('mClient').value.trim();
+  const date = document.getElementById('mDate').value.trim();
+
+  let lines = ['КОММЕРЧЕСКОЕ ПРЕДЛОЖЕНИЕ'];
+  if (date)  lines.push('Дата: ' + date);
+  if (addr)  lines.push('Адрес: ' + addr);
+  if (cli)   lines.push('Заказчик: ' + cli);
+  lines.push('');
+  lines.push('№\tНаименование\tКол-во\tЕд.\tЦена без НДС\tСумма без НДС');
+
+  let grand = 0;
+  rooms.forEach(room => {
+    const pos = getPositions(room);
+    if (!pos.length) return;
+    lines.push('');
+    lines.push('─── ' + (room.name || 'Помещение').toUpperCase() + ' ───');
+    pos.forEach((p, i) => {
+      const s = p.qty * p.price;
+      lines.push([i+1, p.name, fmtN(p.qty), p.unit, fmtN(p.price), fmtN(s)].join('\t'));
+      grand += s;
+    });
+    const t = pos.reduce((s,p)=>s+p.qty*p.price,0);
+    lines.push('\t\t\t\tИтого по разделу:\t' + fmtN(t));
+  });
+  lines.push('');
+  lines.push('══════════════════════════════════════');
+  lines.push('\t\t\t\tИТОГО БЕЗ НДС:\t' + fmtN(grand));
+  lines.push('НДС не облагается.');
+
+  navigator.clipboard.writeText(lines.join('\n')).then(() => toast('Скопировано!'));
+}
+
+function copyTSV() {
+  let rows = [['Помещение','№','Наименование','Кол-во','Ед.','Цена без НДС','Сумма без НДС']];
+  rooms.forEach(room => {
+    getPositions(room).forEach((p, i) => {
+      rows.push([room.name, i+1, p.name, fmtN(p.qty), p.unit, fmtN(p.price), fmtN(p.qty*p.price)]);
+    });
+    const t = getPositions(room).reduce((s,p)=>s+p.qty*p.price,0);
+    rows.push([room.name,'','Итого:','','','',fmtN(t)]);
+  });
+  const grand = grandTotal();
+  rows.push(['','','ИТОГО БЕЗ НДС:','','','',fmtN(grand)]);
+  navigator.clipboard.writeText(rows.map(r=>r.join('\t')).join('\n'))
+    .then(() => toast('TSV скопирован — вставьте в Excel'));
+}
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════════════════════
+function fmt(n) {
+  return Math.round(n).toLocaleString('ru-RU');
+}
+function fmtQ(n) {
+  return (Math.round(n*1000)/1000).toString().replace('.',',');
+}
+function fmtN(n) {
+  return (Math.round(n*100)/100).toString().replace('.',',');
+}
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ═══════════════════════════════════════════════════════════
+//  INIT — загружаем данные из xlsx
+// ═══════════════════════════════════════════════════════════
+(function init() {
+  const d = new Date();
+  document.getElementById('mDate').value =
+    d.toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit',year:'numeric'});
+
+  // Санузел 1
+  const r1 = makeRoom('Санузел 1');
+  r1.floor.on = true; r1.floor.area = 3.88; r1.floor.tile = '60×120 керамогранит'; r1.floor.price = 6500;
+  r1.wallsOn = true;
+  r1.walls = [
+    { id: uid(), label: 'Основная', area: 16.56, tile: '60×120 керамогранит', price: 8000 },
+    { id: uid(), label: 'Декор/ниша', area: 3.5,  tile: '30×60 плитка', price: 7200 },
+  ];
+  r1.trims  = { on: true,  length: 3.3, tile: '60×120 керамогранит', price: 1200 };
+  r1.cut45  = { on: true,  length: 18.37, price: 1200 };
+  r1.cutting= { on: true,  length: 29.74, price: 1000 };
+  r1.grout  = { on: true,  price: 1300 };
+  r1.holes  = { on: true,  qty: 11, price: 1700 };
+  rooms.push(r1);
+
+  // Санузел 2
+  const r2 = makeRoom('Санузел 2');
+  r2.floor.on = true; r2.floor.area = 4.32; r2.floor.tile = '60×120 керамогранит'; r2.floor.price = 6500;
+  r2.wallsOn = true;
+  r2.walls = [
+    { id: uid(), label: 'Основная', area: 16.56, tile: '60×120 керамогранит', price: 8000 },
+    { id: uid(), label: 'Декор/ниша', area: 3.44, tile: '30×60 плитка', price: 7200 },
+  ];
+  r2.trims  = { on: true,  length: 3.3, tile: '60×120 керамогранит', price: 1200 };
+  r2.cut45  = { on: true,  length: 13.75, price: 1200 };
+  r2.cutting= { on: true,  length: 32.36, price: 1000 };
+  r2.grout  = { on: true,  price: 1300 };
+  r2.holes  = { on: true,  qty: 14, price: 1700 };
+  rooms.push(r2);
+
+  // Постирочная
+  const r3 = makeRoom('Постирочная');
+  r3.floor.on = true; r3.floor.area = 3.6; r3.floor.tile = '60×120 керамогранит'; r3.floor.price = 6500;
+  r3.wallsOn = false;
+  r3.walls = [makeWall()];
+  r3.trims  = { on: true,  length: 3.3, tile: '60×120 керамогранит', price: 1200 };
+  r3.cut45  = { on: true,  length: 13.75, price: 1200 };
+  r3.cutting= { on: true,  length: 3.97,  price: 1000 };
+  r3.grout  = { on: true,  price: 1300 };
+  r3.holes  = { on: false, qty: 0, price: 1700 };
+  rooms.push(r3);
+
+  render();
+})();
+</script>
+</body>
+</html>
