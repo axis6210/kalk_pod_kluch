@@ -109,6 +109,7 @@ function uid(){return 'u'+(++_uid);}
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function fmt(n){return Math.round(n).toLocaleString('ru-RU');}
 function fmtN(n){return(Math.round(n*100)/100).toString().replace('.',',');}
+function pn(v){return parseFloat(String(v).replace(',','.'))||0;}
 var KEY='kp-v5',META=['mAddr','mClient','mDate'];
 var UNITS=['м²','пог.м','шт','м','объём'];
 
@@ -255,6 +256,12 @@ function render(){
 // КЛЮЧЕВОЙ ФИХ: сохранять фокус при ререндере
 function rr(rid){
   var act=document.activeElement;
+  // Если пользователь в числовом поле заканчивает на . или , — не перестраивать DOM,
+  // иначе точка/запятая исчезает до ввода следующей цифры
+  if(act&&act.classList&&act.classList.contains('inum')){
+    var _v=act.value;
+    if(_v.slice(-1)==='.'||_v.slice(-1)===','){sched();return;}
+  }
   var fid=act?act.getAttribute('data-fid'):null;
   var ss=act&&act.selectionStart!=null?act.selectionStart:null;
   var se=act&&act.selectionEnd!=null?act.selectionEnd:null;
@@ -263,7 +270,7 @@ function rr(rid){
   document.getElementById('gt').textContent=fmt(gTotal())+' ₽';
   if(fid){
     var el=document.querySelector('[data-fid="'+fid+'"]');
-    if(el){el.focus();try{if(ss!=null&&el.setSelectionRange&&el.type!=='number')el.setSelectionRange(ss,se);}catch(e){}}
+    if(el){el.focus();if(ss!=null&&el.setSelectionRange){var _ss=ss,_se=se;setTimeout(function(){try{el.setSelectionRange(_ss,_se);}catch(e){}},0);}}
   }
   sched();
 }
@@ -296,10 +303,10 @@ function irow(rid,sec,it,showNote){
     +'<button class="idel" onclick="delI(\''+rid+'\',\''+sec+'\',\''+it.id+'\')">✕</button>'
     +'</div>'
     +'<div class="irow-bot">'
-    +'<input class="inum" type="number" min="0" step="0.01" data-fid="'+fbase+':qty" value="'+(it.qty||'')+'" placeholder="0" oninput="SF(\''+rid+'\',\''+sec+'\',\''+it.id+'\',\'qty\',+this.value||0)">'
+    +'<input class="inum" type="text" inputmode="decimal" data-fid="'+fbase+':qty" value="'+(it.qty||'')+'" placeholder="0" oninput="SF(\''+rid+'\',\''+sec+'\',\''+it.id+'\',\'qty\',pn(this.value))">'
     +usel(it.unit,'SF(\''+rid+'\',\''+sec+'\',\''+it.id+'\',\'unit\',this.value)')
     +'<span class="isym">×</span>'
-    +'<input class="inum" type="number" min="0" step="100" data-fid="'+fbase+':price" value="'+(it.price||'')+'" placeholder="₽" oninput="SF(\''+rid+'\',\''+sec+'\',\''+it.id+'\',\'price\',+this.value||0)">'
+    +'<input class="inum" type="text" inputmode="decimal" data-fid="'+fbase+':price" value="'+(it.price||'')+'" placeholder="₽" oninput="SF(\''+rid+'\',\''+sec+'\',\''+it.id+'\',\'price\',pn(this.value))">'
     +'<span class="isym">₽ =</span>'
     +'<span class="isum">'+s+'</span>'
     +'</div>'
@@ -323,9 +330,9 @@ function zoneBlock(rid,arr,zObj,idx,isFloor,onFn,onDel,onAdd){
     +'</div>'
     +'<div class="zone-row">'
     +'<span class="isym" style="font-size:13px">Площадь</span>'
-    +'<input class="inum" type="number" min="0" step="0.01" data-fid="'+fbase+':area" value="'+(zObj.area||'')+'" placeholder="0" oninput="'+onFn+'(\''+rid+'\',\''+zObj.id+'\',\'area\',+this.value||0)">'
+    +'<input class="inum" type="text" inputmode="decimal" data-fid="'+fbase+':area" value="'+(zObj.area||'')+'" placeholder="0" oninput="'+onFn+'(\''+rid+'\',\''+zObj.id+'\',\'area\',pn(this.value))">'
     +'<span class="isym">м²  ×</span>'
-    +'<input class="inum" type="number" min="0" step="100" data-fid="'+fbase+':price" value="'+(zObj.price||'')+'" placeholder="₽/м²" oninput="'+onFn+'(\''+rid+'\',\''+zObj.id+'\',\'price\',+this.value||0)">'
+    +'<input class="inum" type="text" inputmode="decimal" data-fid="'+fbase+':price" value="'+(zObj.price||'')+'" placeholder="₽/м²" oninput="'+onFn+'(\''+rid+'\',\''+zObj.id+'\',\'price\',pn(this.value))">'
     +'<span class="isym">₽/м² =</span>'
     +'<span class="isum">'+s+'</span>'
     +delBtn
@@ -334,9 +341,9 @@ function zoneBlock(rid,arr,zObj,idx,isFloor,onFn,onDel,onAdd){
     +'<div class="subrow">'
     +'<input type="checkbox"'+(zObj.c4on?' checked':'')+' onchange="'+onFn+'(\''+rid+'\',\''+zObj.id+'\',\'c4on\',this.checked)">'
     +'<span class="sub-lbl">Рез 45°</span>'
-    +'<input class="inum" type="number" min="0" step="0.1" data-fid="'+fbase+':c4l" value="'+(zObj.c4l||'')+'" placeholder="0" oninput="'+onFn+'(\''+rid+'\',\''+zObj.id+'\',\'c4l\',+this.value||0)"'+(zObj.c4on?'':' style="opacity:.4"')+'>'
+    +'<input class="inum" type="text" inputmode="decimal" data-fid="'+fbase+':c4l" value="'+(zObj.c4l||'')+'" placeholder="0" oninput="'+onFn+'(\''+rid+'\',\''+zObj.id+'\',\'c4l\',pn(this.value))"'+(zObj.c4on?'':' style="opacity:.4"')+'>'
     +'<span class="isym">м ×</span>'
-    +'<input class="inum" type="number" min="0" step="100" data-fid="'+fbase+':c4p" value="'+(zObj.c4p||'')+'" oninput="'+onFn+'(\''+rid+'\',\''+zObj.id+'\',\'c4p\',+this.value||0)"'+(zObj.c4on?'':' style="opacity:.4"')+'>'
+    +'<input class="inum" type="text" inputmode="decimal" data-fid="'+fbase+':c4p" value="'+(zObj.c4p||'')+'" oninput="'+onFn+'(\''+rid+'\',\''+zObj.id+'\',\'c4p\',pn(this.value))"'+(zObj.c4on?'':' style="opacity:.4"')+'>'
     +'<span class="isym">₽/м =</span>'
     +'<span class="isum">'+sv(zObj.c4on,zObj.c4l,zObj.c4p)+'</span>'
     +'</div>'
@@ -344,9 +351,9 @@ function zoneBlock(rid,arr,zObj,idx,isFloor,onFn,onDel,onAdd){
     +'<div class="subrow">'
     +'<input type="checkbox"'+(zObj.con?' checked':'')+' onchange="'+onFn+'(\''+rid+'\',\''+zObj.id+'\',\'con\',this.checked)">'
     +'<span class="sub-lbl">Резка</span>'
-    +'<input class="inum" type="number" min="0" step="0.1" data-fid="'+fbase+':cl" value="'+(zObj.cl||'')+'" placeholder="0" oninput="'+onFn+'(\''+rid+'\',\''+zObj.id+'\',\'cl\',+this.value||0)"'+(zObj.con?'':' style="opacity:.4"')+'>'
+    +'<input class="inum" type="text" inputmode="decimal" data-fid="'+fbase+':cl" value="'+(zObj.cl||'')+'" placeholder="0" oninput="'+onFn+'(\''+rid+'\',\''+zObj.id+'\',\'cl\',pn(this.value))"'+(zObj.con?'':' style="opacity:.4"')+'>'
     +'<span class="isym">м ×</span>'
-    +'<input class="inum" type="number" min="0" step="100" data-fid="'+fbase+':cp" value="'+(zObj.cp||'')+'" oninput="'+onFn+'(\''+rid+'\',\''+zObj.id+'\',\'cp\',+this.value||0)"'+(zObj.con?'':' style="opacity:.4"')+'>'
+    +'<input class="inum" type="text" inputmode="decimal" data-fid="'+fbase+':cp" value="'+(zObj.cp||'')+'" oninput="'+onFn+'(\''+rid+'\',\''+zObj.id+'\',\'cp\',pn(this.value))"'+(zObj.con?'':' style="opacity:.4"')+'>'
     +'<span class="isym">₽/м =</span>'
     +'<span class="isum">'+sv(zObj.con,zObj.cl,zObj.cp)+'</span>'
     +'</div>'
@@ -393,14 +400,14 @@ function buildRoom(r){
   var hydroBody='<div class="plain-row">'
     +'<input type="checkbox"'+(r.hydro.fon?' checked':'')+' onchange="setH(\''+r.id+'\',\'fon\',this.checked)" style="width:16px;height:16px;flex-shrink:0">'
     +'<span class="plain-lbl">По полу</span>'
-    +'<input class="inum" type="number" min="0" step="0.01" data-fid="'+r.id+':hydro:fa" value="'+(r.hydro.fa||'')+'" placeholder="0" oninput="setH(\''+r.id+'\',\'fa\',+this.value||0)"><span class="isym">м²  ×</span>'
-    +'<input class="inum" type="number" min="0" step="50" data-fid="'+r.id+':hydro:fp" value="'+(r.hydro.fp||'')+'" oninput="setH(\''+r.id+'\',\'fp\',+this.value||0)"><span class="isym">₽/м² =</span>'
+    +'<input class="inum" type="text" inputmode="decimal" data-fid="'+r.id+':hydro:fa" value="'+(r.hydro.fa||'')+'" placeholder="0" oninput="setH(\''+r.id+'\',\'fa\',pn(this.value))"><span class="isym">м²  ×</span>'
+    +'<input class="inum" type="text" inputmode="decimal" data-fid="'+r.id+':hydro:fp" value="'+(r.hydro.fp||'')+'" oninput="setH(\''+r.id+'\',\'fp\',pn(this.value))"><span class="isym">₽/м² =</span>'
     +'<span class="isum">'+sv(r.hydro.fon,r.hydro.fa,r.hydro.fp)+'</span></div>'
     +'<div class="plain-row">'
     +'<input type="checkbox"'+(r.hydro.won?' checked':'')+' onchange="setH(\''+r.id+'\',\'won\',this.checked)" style="width:16px;height:16px;flex-shrink:0">'
     +'<span class="plain-lbl">По стенам</span>'
-    +'<input class="inum" type="number" min="0" step="0.01" data-fid="'+r.id+':hydro:wa" value="'+(r.hydro.wa||'')+'" placeholder="0" oninput="setH(\''+r.id+'\',\'wa\',+this.value||0)"><span class="isym">м²  ×</span>'
-    +'<input class="inum" type="number" min="0" step="50" data-fid="'+r.id+':hydro:wp" value="'+(r.hydro.wp||'')+'" oninput="setH(\''+r.id+'\',\'wp\',+this.value||0)"><span class="isym">₽/м² =</span>'
+    +'<input class="inum" type="text" inputmode="decimal" data-fid="'+r.id+':hydro:wa" value="'+(r.hydro.wa||'')+'" placeholder="0" oninput="setH(\''+r.id+'\',\'wa\',pn(this.value))"><span class="isym">м²  ×</span>'
+    +'<input class="inum" type="text" inputmode="decimal" data-fid="'+r.id+':hydro:wp" value="'+(r.hydro.wp||'')+'" oninput="setH(\''+r.id+'\',\'wp\',pn(this.value))"><span class="isym">₽/м² =</span>'
     +'<span class="isum">'+sv(r.hydro.won,r.hydro.wa,r.hydro.wp)+'</span></div>';
   h+=sec('#01579b','','Гидроизоляция',!r.hydro.cl,'toggleCl(\''+r.id+'\',\'hydro\')',hydroBody,'');
   // ПОЛ — несколько зон
@@ -418,31 +425,31 @@ function buildRoom(r){
     +'<input class="zone-tile" data-fid="'+r.id+':trims:tile" value="'+esc(r.trims.tile)+'" placeholder="Плитка (откосы)" oninput="setTrim(\''+r.id+'\',\'tile\',this.value)">'
     +'</div><div class="zone-row">'
     +'<span class="isym" style="font-size:13px">Длина</span>'
-    +'<input class="inum" type="number" min="0" step="0.1" data-fid="'+r.id+':trims:len" value="'+(r.trims.len||'')+'" placeholder="0" oninput="setTrim(\''+r.id+'\',\'len\',+this.value||0)">'
+    +'<input class="inum" type="text" inputmode="decimal" data-fid="'+r.id+':trims:len" value="'+(r.trims.len||'')+'" placeholder="0" oninput="setTrim(\''+r.id+'\',\'len\',pn(this.value))">'
     +'<span class="isym">пог.м  ×</span>'
-    +'<input class="inum" type="number" min="0" step="100" data-fid="'+r.id+':trims:price" value="'+(r.trims.price||'')+'" oninput="setTrim(\''+r.id+'\',\'price\',+this.value||0)">'
+    +'<input class="inum" type="text" inputmode="decimal" data-fid="'+r.id+':trims:price" value="'+(r.trims.price||'')+'" oninput="setTrim(\''+r.id+'\',\'price\',pn(this.value))">'
     +'<span class="isym">₽/м =</span>'
     +'<span class="isum">'+sv(r.trims.on,r.trims.len,r.trims.price)+'</span>'
     +'</div>'
     +'<div class="subrow"><input type="checkbox"'+(r.trims.c4on?' checked':'')+' onchange="setTrim(\''+r.id+'\',\'c4on\',this.checked)"><span class="sub-lbl">Рез 45°</span>'
-    +'<input class="inum" type="number" min="0" step="0.1" data-fid="'+r.id+':trims:c4l" value="'+(r.trims.c4l||'')+'" placeholder="0" oninput="setTrim(\''+r.id+'\',\'c4l\',+this.value||0)"'+(r.trims.c4on?'':' style="opacity:.4"')+'>'
-    +'<span class="isym">м ×</span><input class="inum" type="number" min="0" step="100" data-fid="'+r.id+':trims:c4p" value="'+(r.trims.c4p||'')+'" oninput="setTrim(\''+r.id+'\',\'c4p\',+this.value||0)"'+(r.trims.c4on?'':' style="opacity:.4"')+'>'
+    +'<input class="inum" type="text" inputmode="decimal" data-fid="'+r.id+':trims:c4l" value="'+(r.trims.c4l||'')+'" placeholder="0" oninput="setTrim(\''+r.id+'\',\'c4l\',pn(this.value))"'+(r.trims.c4on?'':' style="opacity:.4"')+'>'
+    +'<span class="isym">м ×</span><input class="inum" type="text" inputmode="decimal" data-fid="'+r.id+':trims:c4p" value="'+(r.trims.c4p||'')+'" oninput="setTrim(\''+r.id+'\',\'c4p\',pn(this.value))"'+(r.trims.c4on?'':' style="opacity:.4"')+'>'
     +'<span class="isym">₽/м =</span><span class="isum">'+sv(r.trims.c4on,r.trims.c4l,r.trims.c4p)+'</span></div>'
     +'<div class="subrow"><input type="checkbox"'+(r.trims.con?' checked':'')+' onchange="setTrim(\''+r.id+'\',\'con\',this.checked)"><span class="sub-lbl">Резка</span>'
-    +'<input class="inum" type="number" min="0" step="0.1" data-fid="'+r.id+':trims:cl" value="'+(r.trims.cl||'')+'" placeholder="0" oninput="setTrim(\''+r.id+'\',\'cl\',+this.value||0)"'+(r.trims.con?'':' style="opacity:.4"')+'>'
-    +'<span class="isym">м ×</span><input class="inum" type="number" min="0" step="100" data-fid="'+r.id+':trims:cp" value="'+(r.trims.cp||'')+'" oninput="setTrim(\''+r.id+'\',\'cp\',+this.value||0)"'+(r.trims.con?'':' style="opacity:.4"')+'>'
+    +'<input class="inum" type="text" inputmode="decimal" data-fid="'+r.id+':trims:cl" value="'+(r.trims.cl||'')+'" placeholder="0" oninput="setTrim(\''+r.id+'\',\'cl\',pn(this.value))"'+(r.trims.con?'':' style="opacity:.4"')+'>'
+    +'<span class="isym">м ×</span><input class="inum" type="text" inputmode="decimal" data-fid="'+r.id+':trims:cp" value="'+(r.trims.cp||'')+'" oninput="setTrim(\''+r.id+'\',\'cp\',pn(this.value))"'+(r.trims.con?'':' style="opacity:.4"')+'>'
     +'<span class="isym">₽/м =</span><span class="isum">'+sv(r.trims.con,r.trims.cl,r.trims.cp)+'</span></div></div>';
   h+=sec('#6a1b9a',swCb(r.id,'trims',r.trims.on),'Откосы дверные',!r.trims.cl,'toggleCl(\''+r.id+'\',\'trims\')',trimsBody,'');
   // ДОП. РАБОТЫ
   var shBody='<div class="plain-row"><input type="checkbox"'+(r.shower.on?' checked':'')+' onchange="setSh(\''+r.id+'\',\'on\',this.checked)" style="width:16px;height:16px"><span class="plain-lbl" style="font-weight:600">Поддон из плитки</span></div>';
   if(r.shower.on){
-    shBody+='<div class="plain-row"><span class="plain-lbl">Установка трапа</span><input class="inum" type="number" min="0" step="1" data-fid="'+r.id+':shower:tq" value="'+(r.shower.tq||'')+'" oninput="setSh(\''+r.id+'\',\'tq\',+this.value||0)"><span class="isym">шт ×</span><input class="inum" type="number" min="0" step="100" data-fid="'+r.id+':shower:tp" value="'+(r.shower.tp||'')+'" oninput="setSh(\''+r.id+'\',\'tp\',+this.value||0)"><span class="isym">₽ =</span><span class="isum">'+sv(true,r.shower.tq,r.shower.tp)+'</span></div>'
-      +'<div class="subrow"><span class="sub-lbl">Рез 45°</span><input class="inum" type="number" min="0" step="0.1" data-fid="'+r.id+':shower:c4" value="'+(r.shower.c4||'')+'" placeholder="0" oninput="setSh(\''+r.id+'\',\'c4\',+this.value||0)"><span class="isym">м ×</span><input class="inum" type="number" min="0" step="100" data-fid="'+r.id+':shower:c4p" value="'+(r.shower.c4p||'')+'" oninput="setSh(\''+r.id+'\',\'c4p\',+this.value||0)"><span class="isym">₽/м =</span><span class="isum">'+sv(+r.shower.c4>0,r.shower.c4,r.shower.c4p)+'</span></div>'
-      +'<div class="subrow"><span class="sub-lbl">Резка</span><input class="inum" type="number" min="0" step="0.1" data-fid="'+r.id+':shower:cut" value="'+(r.shower.cut||'')+'" placeholder="0" oninput="setSh(\''+r.id+'\',\'cut\',+this.value||0)"><span class="isym">м ×</span><input class="inum" type="number" min="0" step="100" data-fid="'+r.id+':shower:cutp" value="'+(r.shower.cutp||'')+'" oninput="setSh(\''+r.id+'\',\'cutp\',+this.value||0)"><span class="isym">₽/м =</span><span class="isum">'+sv(+r.shower.cut>0,r.shower.cut,r.shower.cutp)+'</span></div>'
-      +'<div class="subrow"><span class="sub-lbl">Гидроизо.</span><input class="inum" type="number" min="0" step="0.01" data-fid="'+r.id+':shower:hydro" value="'+(r.shower.hydro||'')+'" placeholder="0" oninput="setSh(\''+r.id+'\',\'hydro\',+this.value||0)"><span class="isym">м² ×</span><input class="inum" type="number" min="0" step="50" data-fid="'+r.id+':shower:hp" value="'+(r.shower.hp||'')+'" oninput="setSh(\''+r.id+'\',\'hp\',+this.value||0)"><span class="isym">₽/м² =</span><span class="isum">'+sv(+r.shower.hydro>0,r.shower.hydro,r.shower.hp)+'</span></div>';
+    shBody+='<div class="plain-row"><span class="plain-lbl">Установка трапа</span><input class="inum" type="text" inputmode="decimal" data-fid="'+r.id+':shower:tq" value="'+(r.shower.tq||'')+'" oninput="setSh(\''+r.id+'\',\'tq\',pn(this.value))"><span class="isym">шт ×</span><input class="inum" type="text" inputmode="decimal" data-fid="'+r.id+':shower:tp" value="'+(r.shower.tp||'')+'" oninput="setSh(\''+r.id+'\',\'tp\',pn(this.value))"><span class="isym">₽ =</span><span class="isum">'+sv(true,r.shower.tq,r.shower.tp)+'</span></div>'
+      +'<div class="subrow"><span class="sub-lbl">Рез 45°</span><input class="inum" type="text" inputmode="decimal" data-fid="'+r.id+':shower:c4" value="'+(r.shower.c4||'')+'" placeholder="0" oninput="setSh(\''+r.id+'\',\'c4\',pn(this.value))"><span class="isym">м ×</span><input class="inum" type="text" inputmode="decimal" data-fid="'+r.id+':shower:c4p" value="'+(r.shower.c4p||'')+'" oninput="setSh(\''+r.id+'\',\'c4p\',pn(this.value))"><span class="isym">₽/м =</span><span class="isum">'+sv(+r.shower.c4>0,r.shower.c4,r.shower.c4p)+'</span></div>'
+      +'<div class="subrow"><span class="sub-lbl">Резка</span><input class="inum" type="text" inputmode="decimal" data-fid="'+r.id+':shower:cut" value="'+(r.shower.cut||'')+'" placeholder="0" oninput="setSh(\''+r.id+'\',\'cut\',pn(this.value))"><span class="isym">м ×</span><input class="inum" type="text" inputmode="decimal" data-fid="'+r.id+':shower:cutp" value="'+(r.shower.cutp||'')+'" oninput="setSh(\''+r.id+'\',\'cutp\',pn(this.value))"><span class="isym">₽/м =</span><span class="isum">'+sv(+r.shower.cut>0,r.shower.cut,r.shower.cutp)+'</span></div>'
+      +'<div class="subrow"><span class="sub-lbl">Гидроизо.</span><input class="inum" type="text" inputmode="decimal" data-fid="'+r.id+':shower:hydro" value="'+(r.shower.hydro||'')+'" placeholder="0" oninput="setSh(\''+r.id+'\',\'hydro\',pn(this.value))"><span class="isym">м² ×</span><input class="inum" type="text" inputmode="decimal" data-fid="'+r.id+':shower:hp" value="'+(r.shower.hp||'')+'" oninput="setSh(\''+r.id+'\',\'hp\',pn(this.value))"><span class="isym">₽/м² =</span><span class="isum">'+sv(+r.shower.hydro>0,r.shower.hydro,r.shower.hp)+'</span></div>';
   }
-  shBody+='<div class="plain-row"><input type="checkbox"'+(r.grout.on?' checked':'')+' onchange="setGH(\''+r.id+'\',\'grout\',\'on\',this.checked)" style="width:16px;height:16px"><span class="plain-lbl">Затирка <span style="color:#aaa;font-size:11px">(авто: '+ga+' м²)</span></span><span style="font-size:12px;color:#999;min-width:30px;text-align:right">'+ga+'</span><span class="isym">м² ×</span><input class="inum" type="number" min="0" step="100" data-fid="'+r.id+':grout:price" value="'+(r.grout.price||'')+'" oninput="setGH(\''+r.id+'\',\'grout\',\'price\',+this.value||0)"><span class="isym">₽/м² =</span><span class="isum">'+(r.grout.on&&ga>0?fmt(ga*(+r.grout.price||0)):'')+'</span></div>'
-    +'<div class="plain-row"><input type="checkbox"'+(r.holes.on?' checked':'')+' onchange="setGH(\''+r.id+'\',\'holes\',\'on\',this.checked)" style="width:16px;height:16px"><span class="plain-lbl">Отверстия</span><input class="inum" type="number" min="0" step="1" data-fid="'+r.id+':holes:qty" value="'+(r.holes.qty||'')+'" placeholder="0" oninput="setGH(\''+r.id+'\',\'holes\',\'qty\',+this.value||0)"><span class="isym">шт ×</span><input class="inum" type="number" min="0" step="100" data-fid="'+r.id+':holes:price" value="'+(r.holes.price||'')+'" oninput="setGH(\''+r.id+'\',\'holes\',\'price\',+this.value||0)"><span class="isym">₽ =</span><span class="isum">'+sv(r.holes.on,r.holes.qty,r.holes.price)+'</span></div>';
+  shBody+='<div class="plain-row"><input type="checkbox"'+(r.grout.on?' checked':'')+' onchange="setGH(\''+r.id+'\',\'grout\',\'on\',this.checked)" style="width:16px;height:16px"><span class="plain-lbl">Затирка <span style="color:#aaa;font-size:11px">(авто: '+ga+' м²)</span></span><span style="font-size:12px;color:#999;min-width:30px;text-align:right">'+ga+'</span><span class="isym">м² ×</span><input class="inum" type="text" inputmode="decimal" data-fid="'+r.id+':grout:price" value="'+(r.grout.price||'')+'" oninput="setGH(\''+r.id+'\',\'grout\',\'price\',pn(this.value))"><span class="isym">₽/м² =</span><span class="isum">'+(r.grout.on&&ga>0?fmt(ga*(+r.grout.price||0)):'')+'</span></div>'
+    +'<div class="plain-row"><input type="checkbox"'+(r.holes.on?' checked':'')+' onchange="setGH(\''+r.id+'\',\'holes\',\'on\',this.checked)" style="width:16px;height:16px"><span class="plain-lbl">Отверстия</span><input class="inum" type="text" inputmode="decimal" data-fid="'+r.id+':holes:qty" value="'+(r.holes.qty||'')+'" placeholder="0" oninput="setGH(\''+r.id+'\',\'holes\',\'qty\',pn(this.value))"><span class="isym">шт ×</span><input class="inum" type="text" inputmode="decimal" data-fid="'+r.id+':holes:price" value="'+(r.holes.price||'')+'" oninput="setGH(\''+r.id+'\',\'holes\',\'price\',pn(this.value))"><span class="isym">₽ =</span><span class="isum">'+sv(r.holes.on,r.holes.qty,r.holes.price)+'</span></div>';
   h+=sec('#37474f','','Доп. работы (поддон / затирка / отверстия)',!r.shower.cl,'toggleCl(\''+r.id+'\',\'shower\')',shBody,'');
   // ЛЮКИ
   h+=sec('#546e7a',swCb(r.id,'hatches',r.hatches.on),'Люки',!r.hatches.cl,'toggleCl(\''+r.id+'\',\'hatches\')',ilist(r.id,'hatches',r.hatches.items),'<div style="padding:6px 8px"><button class="add-zone-btn" onclick="addI(\''+r.id+'\',\'hatches\')">＋ строка</button></div>');
@@ -453,8 +460,8 @@ function buildRoom(r){
   // ЭЛЕКТРИКА
   h+=sec('#e65100',swCb(r.id,'electric',r.electric.on),'Электрика',!r.electric.cl,'toggleCl(\''+r.id+'\',\'electric\')',ilist(r.id,'electric',r.electric.items),'<div style="padding:6px 8px"><button class="add-zone-btn" onclick="addI(\''+r.id+'\',\'electric\')">＋ строка</button></div>');
   // МУСОР
-  var trashBody='<div class="plain-row"><input type="checkbox"'+(r.trash.large.on?' checked':'')+' onchange="setTr(\''+r.id+'\',\'large\',\'on\',this.checked)" style="width:16px;height:16px"><span class="plain-lbl">Крупногабаритный</span><input class="inum" type="number" min="0" step="0.5" data-fid="'+r.id+':trash:large:qty" value="'+(r.trash.large.qty||'')+'" placeholder="0" oninput="setTr(\''+r.id+'\',\'large\',\'qty\',+this.value||0)"><span class="isym">м³ ×</span><input class="inum" type="number" min="0" step="100" data-fid="'+r.id+':trash:large:price" value="'+(r.trash.large.price||'')+'" placeholder="₽" oninput="setTr(\''+r.id+'\',\'large\',\'price\',+this.value||0)"><span class="isym">₽ =</span><span class="isum">'+sv(r.trash.large.on,r.trash.large.qty,r.trash.large.price)+'</span></div>'
-    +'<div class="plain-row"><input type="checkbox"'+(r.trash.regular.on?' checked':'')+' onchange="setTr(\''+r.id+'\',\'regular\',\'on\',this.checked)" style="width:16px;height:16px"><span class="plain-lbl">Строительный</span><input class="inum" type="number" min="0" step="0.5" data-fid="'+r.id+':trash:regular:qty" value="'+(r.trash.regular.qty||'')+'" placeholder="0" oninput="setTr(\''+r.id+'\',\'regular\',\'qty\',+this.value||0)"><span class="isym">м³ ×</span><input class="inum" type="number" min="0" step="100" data-fid="'+r.id+':trash:regular:price" value="'+(r.trash.regular.price||'')+'" placeholder="₽" oninput="setTr(\''+r.id+'\',\'regular\',\'price\',+this.value||0)"><span class="isym">₽ =</span><span class="isum">'+sv(r.trash.regular.on,r.trash.regular.qty,r.trash.regular.price)+'</span></div>';
+  var trashBody='<div class="plain-row"><input type="checkbox"'+(r.trash.large.on?' checked':'')+' onchange="setTr(\''+r.id+'\',\'large\',\'on\',this.checked)" style="width:16px;height:16px"><span class="plain-lbl">Крупногабаритный</span><input class="inum" type="text" inputmode="decimal" data-fid="'+r.id+':trash:large:qty" value="'+(r.trash.large.qty||'')+'" placeholder="0" oninput="setTr(\''+r.id+'\',\'large\',\'qty\',pn(this.value))"><span class="isym">м³ ×</span><input class="inum" type="text" inputmode="decimal" data-fid="'+r.id+':trash:large:price" value="'+(r.trash.large.price||'')+'" placeholder="₽" oninput="setTr(\''+r.id+'\',\'large\',\'price\',pn(this.value))"><span class="isym">₽ =</span><span class="isum">'+sv(r.trash.large.on,r.trash.large.qty,r.trash.large.price)+'</span></div>'
+    +'<div class="plain-row"><input type="checkbox"'+(r.trash.regular.on?' checked':'')+' onchange="setTr(\''+r.id+'\',\'regular\',\'on\',this.checked)" style="width:16px;height:16px"><span class="plain-lbl">Строительный</span><input class="inum" type="text" inputmode="decimal" data-fid="'+r.id+':trash:regular:qty" value="'+(r.trash.regular.qty||'')+'" placeholder="0" oninput="setTr(\''+r.id+'\',\'regular\',\'qty\',pn(this.value))"><span class="isym">м³ ×</span><input class="inum" type="text" inputmode="decimal" data-fid="'+r.id+':trash:regular:price" value="'+(r.trash.regular.price||'')+'" placeholder="₽" oninput="setTr(\''+r.id+'\',\'regular\',\'price\',pn(this.value))"><span class="isym">₽ =</span><span class="isum">'+sv(r.trash.regular.on,r.trash.regular.qty,r.trash.regular.price)+'</span></div>';
   h+=sec('#558b2f',swCb(r.id,'trash',r.trash.on),'Вывоз мусора',!r.trash.cl,'toggleCl(\''+r.id+'\',\'trash\')',trashBody,'');
   // ПРОЧЕЕ
   h+=sec('#455a64','','Прочие работы',!r.custom.cl,'toggleCl(\''+r.id+'\',\'custom\')',ilist(r.id,'custom',r.custom.items),'<div style="padding:6px 8px"><button class="add-zone-btn" onclick="addI(\''+r.id+'\',\'custom\')">＋ строка</button></div>');
